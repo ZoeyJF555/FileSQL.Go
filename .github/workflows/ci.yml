@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Vet, test and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./... -v
+
+      - name: Build
+        run: go build -o file-sql .
+
+      - name: Smoke test
+        run: |
+          printf 'region,amount\nNorth,150\nSouth,90\n' > sales.csv
+          ./file-sql -q "SELECT region, SUM(amount) AS total FROM sales GROUP BY region" sales.csv
+          ./file-sql -format csv -q "SELECT COUNT(*) AS rows FROM sales" sales.csv | grep -q '^rows$'
