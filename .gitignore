@@ -1,0 +1,14 @@
+# Build output
+/file-sql
+/dist/
+*.exe
+
+# Test data
+/tmp/
+*.db
+*.sqlite
+
+# Editor and OS noise
+.idea/
+.vscode/
+.DS_Store
